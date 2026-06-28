@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+    <style>
+        /* ================= CLASSICAL ROOT STYLING ================= */
+        :root {
+            --bg-primary: #f4f6f9;
+            --sidebar-bg: #2c3e50;
+            --sidebar-text: #ffffff;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --border-color: #e2e8f0;
+            --accent-blue: #3498db;
+            --accent-green: #2ecc71;
+            --accent-red: #e74c3c;
+            --accent-purple: #9b59b6;
+            --shadow: 0 4px 6px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* --- DARK MODE PROPERTIES --- */
+        [data-theme="dark"] {
+            --bg-primary: #1a1a24;
+            --sidebar-bg: #111118;
+            --sidebar-text: #cbd5e1;
+            --card-bg: #222230;
+            --text-main: #f1f5f9;
+            --border-color: #3f3f56;
+            --shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ================= SIDEBAR LAYOUT ================= */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.05);
+        }
+
+        .sidebar-brand h2 {
+            font-size: 20px;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-brand p {
+            font-size: 12px;
+            opacity: 0.6;
+            text-transform: uppercase;
+        }
+
+        .sidebar-menu {
+            margin-top: 40px;
+            flex-grow: 1;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            opacity: 0.8;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            background: rgba(255,255,255,0.03);
+        }
+
+        .menu-item.active {
+            background-color: var(--accent-blue);
+            opacity: 1;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        /* ================= MAIN INTERFACE CONTROLLER ================= */
+        .main-content {
+            flex-grow: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            overflow-y: auto;
+        }
+
+        /* --- UPPER TOPBAR SUMMARY CARDS --- */
+        .topbar-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .stat-card span {
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 600;
+            opacity: 0.6;
+        }
+
+        .stat-card h3 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        /* --- DASHBOARD GRID WORKSPACE --- */
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 25px;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .workspace-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* --- CLASSICAL FORM PANEL --- */
+        .form-panel {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            opacity: 0.8;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+        }
+
+        /* --- COMMAND BUTTON ENGINE --- */
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary { background-color: var(--accent-blue); color: white; }
+        .btn-success { background-color: var(--accent-green); color: white; }
+        .btn-warning { background-color: var(--accent-purple); color: white; }
+        .btn-danger  { background-color: var(--accent-red); color: white; }
+        .btn-secondary { background-color: var(--border-color); color: var(--text-main); }
+
+        .btn-full {
+            grid-column: span 2;
+        }
+
+        /* --- CLASSICAL DATATABLE MATRIX --- */
+        .table-panel {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            max-height: 380px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            padding: 12px 16px;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            opacity: 0.9;
+        }
+
+        tr:hover td {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+
+        /* ================= GLOBAL SYSTEM CREDIT ================= */
+        .credit-signature {
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+            opacity: 0.4;
+            text-align: center;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR CONTROL CENTER -->
+    <div class="sidebar">
+        <div>
+            <div class="sidebar-brand">
+                <h2>SMS Terminal</h2>
+                <p>Classical Standard</p>
+            </div>
+            <div class="sidebar-menu">
+                <a href="#" class="menu-item active">Dashboard Console</a>
+            </div>
+        </div>
+        <!-- Apnar Automated System Credit Section -->
+        <div class="credit-signature">
+            Made by Tahsin Islam
+        </div>
+    </div>
+
+    <!-- MAIN CORE RUNTIME CONTROLLER -->
+    <div class="main-content">
+        
+        <!-- TOPBAR COUNTER MONITOR -->
+        <div class="topbar-summary">
+            <div class="stat-card" style="border-left: 4px solid var(--accent-blue);">
+                <span>Total Students</span>
+                <h3 id="count-total">0</h3>
+            </div>
+            <div class="stat-card" style="border-left: 4px solid var(--accent-green);">
+                <span>CST Batch</span>
+                <h3 id="count-cst">0</h3>
+            </div>
+            <div class="stat-card" style="border-left: 4px solid var(--accent-purple);">
+                <span>CT & ET Batch</span>
+                <h3 id="count-others">0</h3>
+            </div>
+        </div>
+
+        <!-- MATRIX CONTROL FIELD WORKSPACE -->
+        <div class="workspace-grid">
+            
+            <!-- FORM CONTROLS PANEL -->
+            <div class="form-panel">
+                <div class="panel-title">Data Management Inputs</div>
+                
+                <div class="form-group">
+                    <label for="studentName">Name:</label>
+                    <input type="text" id="studentName" class="form-control" placeholder="Enter student name">
+                </div>
+
+                <div class="form-group">
+                    <label for="studentId">ID:</label>
+                    <input type="text" id="studentId" class="form-control" placeholder="Enter numerical ID">
+                </div>
+
+                <div class="form-group">
+                    <label for="studentDept">Department:</label>
+                    <select id="studentDept" class="form-control">
+                        <option value="CST">CST</option>
+                        <option value="CT">CT</option>
+                        <option value="ET">ET</option>
+                    </select>
+                </div>
+
+                <!-- ENGINE BUTTON SYSTEM INTERACTION -->
+                <div class="button-grid">
+                    <button class="btn btn-primary" id="btnAdd">Add</button>
+                    <button class="btn btn-secondary" id="btnSearch">Search</button>
+                    <button class="btn btn-warning" id="btnUpdate">Update</button>
+                    <button class="btn btn-danger" id="btnDelete">Delete</button>
+                    <button class="btn btn-success" id="btnSave">Save</button>
+                    <button class="btn btn-secondary" id="btnLoad">Load</button>
+                    <button class="btn btn-secondary btn-full" id="btnDark">Toggle Dark Mode</button>
+                </div>
+            </div>
+
+            <!-- DYNAMIC JTABLE REPLICA DATA MATRIX -->
+            <div class="table-panel">
+                <div class="panel-title" style="margin-bottom:0;">Live Student Records Engine</div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Dept</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody">
+                            <!-- Java rows runtime rendering stream -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================= JAVASCRIPT APP INTERPRETER ================= -->
+    <script>
+        // Static Virtual List Stream Array Representation
+        let students = [];
+
+        // DOM Target Extraction
+        const nameField = document.getElementById('studentName');
+        const idField = document.getElementById('studentId');
+        const deptBox = document.getElementById('studentDept');
+        const tableBody = document.getElementById('studentTableBody');
+
+        // Statistics Node Extraction
+        const countTotal = document.getElementById('count-total');
+        const countCst = document.getElementById('count-cst');
+        const countOthers = document.getElementById('count-others');
+
+        /* ================= JAVA ACTION LISTENER REFLECTION ================= */
+        
+        // Input Fields Navigation Focus Pipeline (Enter trigger event maps)
+        nameField.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                idField.focus();
+            }
+        });
+
+        idField.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('btnAdd').click();
+            }
+        });
+
+        // REFRESH TABLE ENGINE IMPLEMENTATION
+        function refreshTable(renderData = students) {
+            tableBody.innerHTML = '';
+            
+            renderData.forEach(s => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${s.id}</td>
+                    <td>${s.name}</td>
+                    <td>${s.dept}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // Statistical Computation Matrix
+            countTotal.innerText = students.length;
+            countCst.innerText = students.filter(s => s.dept === 'CST').length;
+            countOthers.innerText = students.filter(s => s.dept === 'CT' || s.dept === 'ET').length;
+        }
+
+        // Form Fields Reset Automation
+        function clearInputForm() {
+            nameField.value = '';
+            idField.value = '';
+            deptBox.selectedIndex = 0;
+            nameField.focus();
+        }
+
+        // ADD BUTTON OPERATION
+        document.getElementById('btnAdd').addEventListener('click', () => {
+            const idVal = parseInt(idField.value.trim());
+            const nameVal = nameField.value.trim();
+            const deptVal = deptBox.value;
+
+            if (isNaN(idVal) || nameVal === '') {
+                alert('Invalid Input!');
+                return;
+            }
+
+            // Object blueprint instantiation
+            students.push({ id: idVal, name: nameVal, dept: deptVal });
+            refreshTable();
+            clearInputForm();
+        });
+
+        // SEARCH BUTTON OPERATION
+        document.getElementById('btnSearch').addEventListener('click', () => {
+            const searchName = nameField.value.trim().toLowerCase();
+            
+            const filtered = students.filter(s => 
+                s.name.toLowerCase().includes(searchName)
+            );
+            
+            refreshTable(filtered);
+        });
+
+        // UPDATE BUTTON OPERATION
+        document.getElementById('btnUpdate').addEventListener('click', () => {
+            const targetId = parseInt(idField.value.trim());
+            const newName = nameField.value.trim();
+            const newDept = deptBox.value;
+
+            if (isNaN(targetId)) {
+                alert('Invalid Input!');
+                return;
+            }
+
+            let found = false;
+            for (let i = 0; i < students.length; i++) {
+                if (students[i].id === targetId) {
+                    students[i].name = newName;
+                    students[i].dept = newDept;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found) {
+                refreshTable();
+                clearInputForm();
+            } else {
+                alert('Student not found!');
+            }
+        });
+
+        // DELETE BUTTON OPERATION
+        document.getElementById('btnDelete').addEventListener('click', () => {
+            const targetId = parseInt(idField.value.trim());
+
+            if (isNaN(targetId)) {
+                alert('Invalid ID!');
+                return;
+            }
+
+            const initialLength = students.length;
+            students = students.filter(s => s.id !== targetId);
+
+            if (students.length < initialLength) {
+                refreshTable();
+                clearInputForm();
+                alert('Student Deleted!');
+            } else {
+                alert('Student Not Found!');
+            }
+        });
+
+        // SAVE BUTTON OPERATION (Using modern LocalStorage serialization abstraction)
+        document.getElementById('btnSave').addEventListener('click', () => {
+            try {
+                localStorage.setItem('students_dat', JSON.stringify(students));
+                alert('Saved!');
+            } catch (e) {
+                alert('Save Failed!');
+            }
+        });
+
+        // LOAD BUTTON OPERATION
+        document.getElementById('btnLoad').addEventListener('click', () => {
+            try {
+                const data = localStorage.getItem('students_dat');
+                if (data) {
+                    students = JSON.parse(data);
+                    refreshTable();
+                } else {
+                    alert('No saved data found in dat storage local stream!');
+                }
+            } catch (e) {
+                alert('Load Failed!');
+            }
+        });
+
+        // DARK MODE TOGGLE OPERATION
+        document.getElementById('btnDark').addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        });
+    </script>
+</body>
+</html>
