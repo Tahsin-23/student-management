@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -52,6 +52,81 @@
             display: flex;
             height: 100vh;
             overflow: hidden;
+        }
+
+        /* MOBILE TOP HEADER (Hidden on Desktop) */
+        .mobile-header {
+            display: none;
+            background-color: var(--sidebar-bg);
+            color: #ffffff;
+            padding: 12px 20px;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .mobile-header .brand h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .mobile-header .brand p {
+            font-size: 10px;
+            color: var(--sidebar-text);
+            text-transform: uppercase;
+        }
+
+        /* MOBILE BOTTOM NAVIGATION BAR (Hidden on Desktop) */
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--sidebar-bg);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 0;
+            z-index: 1000;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.3);
+        }
+
+        .nav-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--sidebar-text);
+            background: none;
+            border: none;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 25%;
+            padding: 4px 0;
+            transition: color 0.2s;
+        }
+
+        .nav-button i {
+            font-size: 18px;
+            transition: transform 0.2s;
+        }
+
+        .nav-button.active {
+            color: #3b82f6;
+            font-weight: 700;
+        }
+
+        .nav-button.active i {
+            transform: translateY(-2px);
         }
 
         /* ================= SIDEBAR LAYOUT ================= */
@@ -244,7 +319,7 @@
             opacity: 0.6;
         }
 
-        /* GEAR SPINNING HOVER EFFECT */
+        /* GEAR SPINNING HOVER & ACTIVE ANIMATION */
         .settings-trigger {
             background: none;
             border: none;
@@ -270,6 +345,16 @@
 
         .settings-trigger:hover i {
             transform: rotate(180deg);
+        }
+
+        /* Continuous rotation while active/open */
+        .settings-trigger.active-spin i {
+            animation: spinGear 3s linear infinite;
+        }
+
+        @keyframes spinGear {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         /* Settings Dropdown Popup */
@@ -373,12 +458,6 @@
             grid-template-columns: 340px 1fr;
             gap: 25px;
             align-items: start;
-        }
-
-        @media (max-width: 900px) {
-            .workspace-grid {
-                grid-template-columns: 1fr;
-            }
         }
 
         .form-panel {
@@ -565,11 +644,60 @@
         .sidebar.collapsed .credit-signature {
             display: none;
         }
+
+        /* ================= RESPONSIVE DESIGN (MOBILE ADAPTATION) ================= */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .mobile-bottom-nav {
+                display: flex;
+            }
+
+            .sidebar {
+                display: none; /* Hide sidebar in mobile view */
+            }
+
+            .main-content {
+                padding: 70px 15px 80px 15px; /* Add top/bottom padding to prevent overlap with headers */
+            }
+
+            .workspace-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar-summary {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .settings-dropdown {
+                position: fixed;
+                bottom: 65px;
+                right: 15px;
+                left: 15px;
+                width: auto;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <!-- SIDEBAR CONTROL CENTER -->
+    <!-- MOBILE TOP BAR HEADER -->
+    <div class="mobile-header">
+        <div class="brand">
+            <h2>SMS Terminal</h2>
+            <p>Classical Standard</p>
+        </div>
+        <div class="avatar" style="width:32px; height:32px; font-size:12px;">TI</div>
+    </div>
+
+    <!-- SIDEBAR CONTROL CENTER (DESKTOP) -->
     <div class="sidebar" id="sidebarMain">
         <div>
             <div class="sidebar-top">
@@ -581,15 +709,15 @@
             </div>
             
             <div class="sidebar-menu">
-                <a onclick="switchView('dashboard', this)" class="menu-item active">
+                <a onclick="switchView('dashboard', this)" class="menu-item active nav-item-dashboard">
                     <i class="fas fa-th-large"></i>
                     <span class="menu-text">Dashboard Console</span>
                 </a>
-                <a onclick="switchView('directory', this)" class="menu-item">
+                <a onclick="switchView('directory', this)" class="menu-item nav-item-directory">
                     <i class="fas fa-folder-open"></i>
                     <span class="menu-text">Student Directory</span>
                 </a>
-                <a onclick="switchView('analytics', this)" class="menu-item">
+                <a onclick="switchView('analytics', this)" class="menu-item nav-item-analytics">
                     <i class="fas fa-chart-bar"></i>
                     <span class="menu-text">Analytics Report</span>
                 </a>
@@ -607,7 +735,7 @@
                             <p>Administrator</p>
                         </div>
                     </div>
-                    <button class="settings-trigger" onclick="toggleSettingsDropdown()" title="Settings">
+                    <button class="settings-trigger" id="settingsBtn" onclick="toggleSettingsDropdown()" title="Settings">
                         <i class="fas fa-cog"></i>
                     </button>
                 </div>
@@ -616,7 +744,7 @@
                 <div class="settings-dropdown" id="settingsDropdown">
                     <div class="dropdown-item" onclick="toggleDarkMode()">
                         <i class="fas fa-moon"></i>
-                        <span>Toggle Dark Mode</span>
+                        <span>Toggle Light Mode</span>
                     </div>
                 </div>
             </div>
@@ -756,6 +884,26 @@
 
     </div>
 
+    <!-- MOBILE BOTTOM NAVIGATION BAR -->
+    <div class="mobile-bottom-nav">
+        <button class="nav-button active m-nav-dashboard" onclick="switchView('dashboard', this)">
+            <i class="fas fa-th-large"></i>
+            <span>Dashboard</span>
+        </button>
+        <button class="nav-button m-nav-directory" onclick="switchView('directory', this)">
+            <i class="fas fa-folder-open"></i>
+            <span>Directory</span>
+        </button>
+        <button class="nav-button m-nav-analytics" onclick="switchView('analytics', this)">
+            <i class="fas fa-chart-bar"></i>
+            <span>Analytics</span>
+        </button>
+        <button class="nav-button" id="mobileSettingsBtn" onclick="toggleSettingsDropdown()">
+            <i class="fas fa-cog"></i>
+            <span>Settings</span>
+        </button>
+    </div>
+
     <!-- ================= JAVASCRIPT APP INTERPRETER ================= -->
     <script>
         let students = [];
@@ -776,9 +924,17 @@
         function switchView(viewId, element) {
             document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            document.querySelectorAll('.nav-button').forEach(nb => nb.classList.remove('active'));
             
             document.getElementById(`view-${viewId}`).classList.add('active');
-            element.classList.add('active');
+
+            // Sync Desktop Sidebar Active state
+            const desktopNav = document.querySelector(`.nav-item-${viewId}`);
+            if(desktopNav) desktopNav.classList.add('active');
+
+            // Sync Mobile Bottom Nav Active state
+            const mobileNav = document.querySelector(`.m-nav-${viewId}`);
+            if(mobileNav) mobileNav.classList.add('active');
         }
 
         function toggleSidebar() {
@@ -786,7 +942,15 @@
         }
 
         function toggleSettingsDropdown() {
-            document.getElementById('settingsDropdown').classList.toggle('show');
+            const dropdown = document.getElementById('settingsDropdown');
+            const gearBtn = document.getElementById('settingsBtn');
+            const mobileGearBtn = document.getElementById('mobileSettingsBtn');
+            
+            dropdown.classList.toggle('show');
+            const isOpen = dropdown.classList.contains('show');
+            
+            if (gearBtn) gearBtn.classList.toggle('active-spin', isOpen);
+            if (mobileGearBtn) mobileGearBtn.classList.toggle('active-spin', isOpen);
         }
 
         function toggleDarkMode() {
@@ -796,13 +960,27 @@
             } else {
                 document.documentElement.setAttribute('data-theme', 'dark');
             }
+            closeSettingsDropdown();
+        }
+
+        function closeSettingsDropdown() {
             document.getElementById('settingsDropdown').classList.remove('show');
+            const gearBtn = document.getElementById('settingsBtn');
+            const mobileGearBtn = document.getElementById('mobileSettingsBtn');
+            if (gearBtn) gearBtn.classList.remove('active-spin');
+            if (mobileGearBtn) mobileGearBtn.classList.remove('active-spin');
         }
 
         // Close Popovers when clicking outside
         window.addEventListener('click', function(e) {
-            if (!document.getElementById('sidebarMain').contains(e.target)) {
-                document.getElementById('settingsDropdown').classList.remove('show');
+            const dropdown = document.getElementById('settingsDropdown');
+            const gearBtn = document.getElementById('settingsBtn');
+            const mobileGearBtn = document.getElementById('mobileSettingsBtn');
+            
+            if (!dropdown.contains(e.target) && 
+                (!gearBtn || !gearBtn.contains(e.target)) && 
+                (!mobileGearBtn || !mobileGearBtn.contains(e.target))) {
+                closeSettingsDropdown();
             }
         });
 
