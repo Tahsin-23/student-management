@@ -91,7 +91,6 @@
             right: 0;
             background-color: var(--sidebar-bg);
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-            display: none;
             justify-content: space-around;
             align-items: center;
             padding: 8px 0;
@@ -113,6 +112,7 @@
             width: 25%;
             padding: 4px 0;
             transition: color 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .nav-button i {
@@ -332,6 +332,7 @@
             align-items: center;
             justify-content: center;
             transition: color 0.2s, background 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .settings-trigger i {
@@ -348,7 +349,7 @@
         }
 
         /* Continuous rotation while active/open */
-        .settings-trigger.active-spin i {
+        .settings-trigger.active-spin i, .nav-button.active-spin i {
             animation: spinGear 3s linear infinite;
         }
 
@@ -357,19 +358,19 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Settings Dropdown Popup */
+        /* GLOBAL SETTINGS DROPDOWN POPUP */
         .settings-dropdown {
             display: none;
-            position: absolute;
-            bottom: 60px;
-            right: 0;
+            position: fixed;
+            bottom: 70px;
+            left: 20px;
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
             box-shadow: var(--shadow);
-            width: 180px;
+            width: 200px;
             padding: 8px;
-            z-index: 200;
+            z-index: 99999;
             flex-direction: column;
             gap: 4px;
             animation: popIn 0.2s ease-out;
@@ -381,7 +382,7 @@
         }
 
         .settings-dropdown.show {
-            display: flex;
+            display: flex !important;
         }
 
         .dropdown-item {
@@ -645,7 +646,7 @@
             display: none;
         }
 
-        /* ================= RESPONSIVE DESIGN (MOBILE ADAPTATION) ================= */
+        /* ================= RESPONSIVE DESIGN ================= */
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
@@ -657,14 +658,15 @@
 
             .mobile-bottom-nav {
                 display: flex;
+                z-index: 1000;
             }
 
             .sidebar {
-                display: none; /* Hide sidebar in mobile view */
+                display: none;
             }
 
             .main-content {
-                padding: 70px 15px 80px 15px; /* Add top/bottom padding to prevent overlap with headers */
+                padding: 70px 15px 80px 15px;
             }
 
             .workspace-grid {
@@ -677,11 +679,15 @@
             }
 
             .settings-dropdown {
-                position: fixed;
-                bottom: 65px;
-                right: 15px;
-                left: 15px;
-                width: auto;
+                left: 15px !important;
+                right: 15px !important;
+                width: auto !important;
+                bottom: 70px !important;
+            }
+
+            .settings-trigger, .nav-button {
+                -webkit-tap-highlight-color: transparent;
+                cursor: pointer;
             }
         }
     </style>
@@ -735,17 +741,9 @@
                             <p>Administrator</p>
                         </div>
                     </div>
-                    <button class="settings-trigger" id="settingsBtn" onclick="toggleSettingsDropdown()" title="Settings">
+                    <button class="settings-trigger" id="settingsBtn" onclick="toggleSettingsDropdown(event)" title="Settings">
                         <i class="fas fa-cog"></i>
                     </button>
-                </div>
-
-                <!-- Settings Dropdown Popover -->
-                <div class="settings-dropdown" id="settingsDropdown">
-                    <div class="dropdown-item" onclick="toggleDarkMode()">
-                        <i class="fas fa-moon"></i>
-                        <span>Toggle Light Mode</span>
-                    </div>
                 </div>
             </div>
 
@@ -753,6 +751,14 @@
             <div class="credit-signature">
                 Made by Tahsin Islam
             </div>
+        </div>
+    </div>
+
+    <!-- GLOBAL SETTINGS DROPDOWN POPOVER (AVAILABLE FOR BOTH DESKTOP & MOBILE) -->
+    <div class="settings-dropdown" id="settingsDropdown">
+        <div class="dropdown-item" onclick="toggleDarkMode()">
+            <i class="fas fa-moon"></i>
+            <span>Toggle Light Mode</span>
         </div>
     </div>
 
@@ -799,7 +805,7 @@
                             <option value="CST">Computer Science & Technology (CST)</option>
                             <option value="CT">Civil Technology(CT)</option>
                             <option value="ET">Electrical Technology(ET)</option>
-                          <option value="MT">Machanical Technology(MT)</option>
+                            <option value="MT">Machanical Technology(MT)</option>
                         </select>
                     </div>
 
@@ -899,7 +905,7 @@
             <i class="fas fa-chart-bar"></i>
             <span>Analytics</span>
         </button>
-        <button class="nav-button" id="mobileSettingsBtn" onclick="toggleSettingsDropdown()">
+        <button class="nav-button" id="mobileSettingsBtn" onclick="toggleSettingsDropdown(event)">
             <i class="fas fa-cog"></i>
             <span>Settings</span>
         </button>
@@ -936,19 +942,24 @@
             // Sync Mobile Bottom Nav Active state
             const mobileNav = document.querySelector(`.m-nav-${viewId}`);
             if(mobileNav) mobileNav.classList.add('active');
+            
+            closeSettingsDropdown();
         }
 
         function toggleSidebar() {
             document.getElementById('sidebarMain').classList.toggle('collapsed');
         }
 
-        function toggleSettingsDropdown() {
+        // TOUCH & CLICK EVENT FIX FOR MOBILE/TAB
+        function toggleSettingsDropdown(event) {
+            if (event) {
+                event.stopPropagation();
+            }
             const dropdown = document.getElementById('settingsDropdown');
             const gearBtn = document.getElementById('settingsBtn');
             const mobileGearBtn = document.getElementById('mobileSettingsBtn');
             
-            dropdown.classList.toggle('show');
-            const isOpen = dropdown.classList.contains('show');
+            const isOpen = dropdown.classList.toggle('show');
             
             if (gearBtn) gearBtn.classList.toggle('active-spin', isOpen);
             if (mobileGearBtn) mobileGearBtn.classList.toggle('active-spin', isOpen);
@@ -965,20 +976,22 @@
         }
 
         function closeSettingsDropdown() {
-            document.getElementById('settingsDropdown').classList.remove('show');
+            const dropdown = document.getElementById('settingsDropdown');
+            if (dropdown) dropdown.classList.remove('show');
+            
             const gearBtn = document.getElementById('settingsBtn');
             const mobileGearBtn = document.getElementById('mobileSettingsBtn');
             if (gearBtn) gearBtn.classList.remove('active-spin');
             if (mobileGearBtn) mobileGearBtn.classList.remove('active-spin');
         }
 
-        // Close Popovers when clicking outside
-        window.addEventListener('click', function(e) {
+        // Close Popovers when clicking outside (touch supported)
+        document.addEventListener('click', function(e) {
             const dropdown = document.getElementById('settingsDropdown');
             const gearBtn = document.getElementById('settingsBtn');
             const mobileGearBtn = document.getElementById('mobileSettingsBtn');
             
-            if (!dropdown.contains(e.target) && 
+            if (dropdown && !dropdown.contains(e.target) && 
                 (!gearBtn || !gearBtn.contains(e.target)) && 
                 (!mobileGearBtn || !mobileGearBtn.contains(e.target))) {
                 closeSettingsDropdown();
@@ -1015,7 +1028,7 @@
             // Statistical Computation Matrix
             const totalCount = students.length;
             const cstCount = students.filter(s => s.dept === 'CST').length;
-            const othersCount = students.filter(s => s.dept === 'CT' || s.dept === 'ET').length;
+            const othersCount = students.filter(s => s.dept === 'CT' || s.dept === 'ET' || s.dept === 'MT').length;
 
             countTotal.innerText = totalCount;
             countCst.innerText = cstCount;
